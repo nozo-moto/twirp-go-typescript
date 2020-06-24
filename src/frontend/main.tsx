@@ -1,7 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./main.scss";
-import * as helloworld from "./helloworld";
+import 'isomorphic-fetch'
+import './twirp';
+import {DefaultHelloWorld, HelloResp} from './helloworld';
 
 class App extends React.Component {
   render() {
@@ -13,8 +15,15 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    const h = new helloworld.DefaultHelloWorld("localhost:8080", fetch);
-    console.log(h.hello({subject: "world"}))
+    //const h = new DefaultHelloWorld("localhost:8080", fetch);
+    const h = new DefaultHelloWorld("http://localhost:8080", window.fetch.bind(window));
+    h.hello({subject: "world"}).then(
+        (res: HelloResp) => {
+            console.log(res);
+        }
+    ).catch(e => {
+        console.error(e);
+    });
   }
 }
 

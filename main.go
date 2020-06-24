@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	pb "github.com/nozo-moto/twirp-go-typescript/proto/helloworld"
 	"github.com/twitchtv/twirp"
 )
@@ -24,9 +25,17 @@ func (s *HelloWorldServer) Hello(ctx context.Context, req *pb.HelloReq) (resp *p
 func main() {
 	hook := LoggingHooks(os.Stderr)
 
+	router := gin.Default()
+	router.Static("/statics", "./src/static")
+	router.LoadHTMLGlob("./src/template/*")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html.tpl", gin.H{})
+	})
+
 	handler := pb.NewHelloWorldServer(&HelloWorldServer{}, hook)
 	mux := http.NewServeMux()
 	mux.Handle(pb.HelloWorldPathPrefix, handler)
+	mux.Handle("/", router)
 	http.ListenAndServe(":8080", mux)
 }
 
